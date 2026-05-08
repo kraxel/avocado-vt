@@ -1432,6 +1432,9 @@ class VM(virt_vm.BaseVM):
                 return StrDev(name, cmdline=cmdline, parent_bus=parent_bus)
             return QDevice(vga_dev, parent_bus=parent_bus)
 
+        def add_shim(filename):
+            return " -shim '%s'" % filename
+
         def add_kernel(filename):
             return " -kernel '%s'" % filename
 
@@ -2922,6 +2925,9 @@ class VM(virt_vm.BaseVM):
         if kernel:
             kernel = utils_misc.get_path(data_dir.get_data_dir(), kernel)
             devices.insert(StrDev("kernel", cmdline=add_kernel(kernel)))
+            if devices.has_option("shim"):
+                shim = os.path.join(os.path.dirname(kernel), "shim.efi")
+                devices.insert(StrDev("shim", cmdline=add_shim(shim)))
 
         kernel_params = params.get("kernel_params")
         if kernel_params:
