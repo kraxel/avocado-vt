@@ -1081,12 +1081,24 @@ class UnattendedInstallConfig(object):
             except IndexError:
                 sha1sum_initrd = ""
 
+            url_shim = None
+            if self.params.get("vm_arch_name") == "x86_64":
+                url_shim = os.path.join(self.url, "EFI/BOOT/BOOTX64.EFI")
+            if self.params.get("vm_arch_name") == "aarch64":
+                url_shim = os.path.join(self.url, "EFI/BOOT/BOOTAA64.EFI")
+
             url_kernel = os.path.join(
                 self.url, self.boot_path, os.path.basename(self.kernel)
             )
             url_initrd = os.path.join(
                 self.url, self.boot_path, os.path.basename(self.initrd)
             )
+
+            if url_shim is not None:
+                path_shim = os.path.join(self.image_path, "shim.efi")
+                if not os.path.isfile(path_shim):
+                    LOG.info("Downloading %s -> %s", url_shim, path_shim)
+                    download.get_file(url_shim, path_shim)
 
             if not sha1sum_kernel == self.params.get("sha1sum_vmlinuz", None):
                 if os.path.isfile(self.kernel):
